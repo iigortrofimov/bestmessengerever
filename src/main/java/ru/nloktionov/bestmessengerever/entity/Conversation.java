@@ -68,24 +68,13 @@ public class Conversation extends AbstractAggregateRoot<Conversation> {
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<Participant> participants = new LinkedHashSet<>();
 
-//    public void addParticipants(Set<User> users) {
-//        registerEvent(new AddParticipantsToConversationEvent(this, users));
-//    }
-//
-//    public void addParticipant() {
-//
-//    }
-//
-//    public void setParticipants(Set<Participant> participants) {
-//        if (this.participants != null) {
-//            this.participants.forEach(participant -> participant.setConversation(null));
-//        }
-//        if (participants != null) {
-//            participants.forEach(participant -> participant.setConversation(this));
-//        }
-//        this.participants = participants;
-//    }
-//
+    public void addMeta(String conversationName) {
+        this.conversationMeta = ConversationMeta.builder()
+                .conversation(this)
+                .conversationName(conversationName)
+                .build();
+    }
+
     public void addParticipants(Set<User> users) {
         checkThisParticipantsNotNull();
         Set<Participant> participants = new LinkedHashSet<>();
@@ -98,6 +87,18 @@ public class Conversation extends AbstractAggregateRoot<Conversation> {
                         .build()
         ));
         this.participants.addAll(participants);
+    }
+
+    public void addParticipant(User user, ParticipantRole participantRole) {
+        checkThisParticipantsNotNull();
+        this.participants.add(
+                Participant.builder()
+                        .conversation(this)
+                        .user(user)
+                        .participantStatus(ParticipantStatus.ACTIVE)
+                        .participantRole(participantRole)
+                        .build()
+        );
     }
 
     private void checkThisParticipantsNotNull() {

@@ -34,6 +34,6 @@ public class ConversationMeta {
     @Column(name = "conversation_name", nullable = false, length = 50)
     private String conversationName;
 
-    @Column(name = "conversation_picture", nullable = false)
+    @Column(name = "conversation_picture", nullable = true)
     private Long conversationPicture;
 }

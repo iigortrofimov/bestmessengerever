@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.nloktionov.bestmessengerever.entity.Conversation;
 import ru.nloktionov.bestmessengerever.entity.User;
 import ru.nloktionov.bestmessengerever.enums.ConversationType;
+import ru.nloktionov.bestmessengerever.enums.ParticipantRole;
 import ru.nloktionov.bestmessengerever.exceptions.ExceptionMessage;
 import ru.nloktionov.bestmessengerever.exceptions.ResourceNotFoundException;
 import ru.nloktionov.bestmessengerever.repository.ConversationRepository;
@@ -35,19 +36,17 @@ public class ConversationService {
         if (conversationOptional.isPresent())
             return conversationOptional.get();
 
-
-        Conversation conversation = buildPrivateConversation();
+        Conversation conversation = buildConversation(ConversationType.PRIVATE);
 
         Conversation conversationSaved = saveConversation(conversation);
         conversationSaved.addParticipants(users);
 
-
         return conversationSaved;
     }
 
-    private Conversation buildPrivateConversation() {
+    private Conversation buildConversation(ConversationType conversationType) {
         return Conversation.builder()
-                .conversationType(ConversationType.PRIVATE)
+                .conversationType(conversationType)
                 .build();
     }
 
@@ -61,5 +60,14 @@ public class ConversationService {
                 conversation.getParticipants().stream()
                         .filter(participant -> !participant.getUser().equals(currentUser))
                         .findAny().get().getUser().getFirstnameLastname();
+    }
+
+    public Conversation createGroupConversation(String chatName, User owner, Set<User> users) {
+        Conversation conversation = buildConversation(ConversationType.GROUP);
+        Conversation conversationSaved =  saveConversation(conversation);
+        conversationSaved.addMeta(chatName);
+        conversationSaved.addParticipants(users);
+        conversationSaved.addParticipant(owner, ParticipantRole.OWNER);
+        return conversationSaved;
     }
 }

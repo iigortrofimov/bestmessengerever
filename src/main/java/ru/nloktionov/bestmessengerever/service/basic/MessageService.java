@@ -57,6 +57,21 @@ public class MessageService {
         return message;
     }
 
+    public Message buildMessage(MessageType messageType, User sender, Conversation conversation) {
+        Message message = Message.builder()
+                .messageType(messageType)
+                .conversation(conversation)
+                .sender(sender)
+                .build();
+
+        message.addParticipants(conversation.getParticipants().stream()
+                .filter(participant -> participant.getParticipantStatus().equals(ParticipantStatus.ACTIVE))
+                .map(Participant::getUser)
+                .collect(Collectors.toSet()));
+
+        return message;
+    }
+
     public Message findMessageById(Long messageId) {
         return messageRepository.findById(messageId)
                 .orElseThrow(() -> new ResourceNotFoundException(ExceptionMessage.NOT_FOUND_MESSAGE(messageId)));
